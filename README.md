@@ -1,22 +1,30 @@
-#  Sistema de Integração e BI para Saúde e Segurança do Trabalho (SST)
+# 📊 Sistema de Integração e BI para Saúde e Segurança do Trabalho (SST)
 
-Este projeto simula um pipeline completo de Análise e Integração de Dados focado no setor de Saúde e Segurança do Trabalho (SST). O objetivo é integrar dados do setor de Recursos Humanos (RH) com registros médicos ocupacionais para monitorar afastamentos e gerar alertas gerenciais automáticos.
+Este projeto simula um pipeline completo de Análise e Integração de Dados focado no setor de SST. O diferencial desta solução é a arquitetura **Full-Stack**, utilizando uma API para servir os dados e um Dashboard para visualização, ambos hospedados em nuvem.
 
-##  O Problema de Negócio
-No cenário corporativo, sistemas de RH e softwares de Medicina do Trabalho (como o SOC) muitas vezes operam em silos. Este projeto resolve a necessidade de cruzar essas informações para:
-- Mapear os principais motivos de afastamento e doenças ocupacionais.
-- Contabilizar os dias perdidos por colaborador.
-- Gerar alertas automáticos para colaboradores com 15+ dias de atestado acumulado (regra crítica para encaminhamento ao INSS).
+## 🌐 Links do Projeto (Live)
+- **Dashboard Online:** [Acesse o Painel Interativo](https://projeto-integracao-sst-kfxn6hraapryygsckr6fqf.streamlit.app/)
+- **Documentação da API (Swagger):** [Explore os Endpoints](https://projeto-integracao-sst-2.onrender.com/docs)
 
-##  Arquitetura (Pipeline ETL)
-O projeto foi construído seguindo as melhores práticas de **ETL (Extract, Transform, Load)**:
-1. **Extract:** Consumo de API REST simulando a extração de colaboradores do sistema de RH.
-2. **Transform:** Limpeza, higienização e cruzamento de dados utilizando **Python** e a biblioteca **Pandas**.
-3. **Load:** Carga e modelagem dos dados em um banco de dados relacional **SQLite** (`banco_sst.db`).
-4. **Data Viz:** Construção de um Dashboard interativo com filtros dinâmicos utilizando **Streamlit** e **Plotly**.
+## 💼 O Problema de Negócio
+No cenário corporativo, sistemas de RH e softwares de Medicina do Trabalho muitas vezes operam de forma isolada. Este projeto integra essas informações para:
+- Mapear motivos de afastamento e doenças ocupacionais.
+- Gerar alertas automáticos para colaboradores com **15+ dias de atestado** (regra crítica para encaminhamento ao INSS).
 
-##  Como Executar o Projeto
+## 🏗️ Arquitetura do Sistema
+O projeto evoluiu de um script local para uma arquitetura distribuída:
 
-1. Clone este repositório:
-```bash
-git clone [https://github.com/FeshowBiel/projeto-integracao-sst.git](https://github.com/FeshowBiel/projeto-integracao-sst.git)
+1. **Banco de Dados:** Relacional (SQLite) modelado para performance e integridade.
+2. **Backend (API):** Desenvolvido com **FastAPI**, responsável pelas regras de negócio e rotas de consulta. Hospedado no **Render**.
+3. **Frontend (Dashboard):** Construído com **Streamlit**, consumindo dados em tempo real da API via requisições HTTP. Hospedado no **Streamlit Cloud**.
+
+## 🛠️ Tecnologias Utilizadas
+- **Python 3.x** (Pandas, FastAPI, Requests)
+- **SQLite** (Banco de dados relacional)
+- **Streamlit** (Interface visual)
+- **Git & GitHub** (Versionamento e CI/CD)
+
+## 🔧 Como Executar Localmente
+1. Clone o repositório:
+   ```bash
+   git clone [https://github.com/FeshowBiel/projeto-integracao-sst.git](https://github.com/FeshowBiel/projeto-integracao-sst.git)
