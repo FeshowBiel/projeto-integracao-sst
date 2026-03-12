@@ -4,80 +4,77 @@ import pandas as pd
 import requests
 import plotly.express as px
 
-# ...
+# --- CONFIGURAÇÃO DA PÁGININA E SEGURANÇA ---
+st.set_page_config(page_title="Dashboard SST", layout="wide")
+st.title("📊 Painel de Integração SST")
 
-# Puxa a senha do cofre do Streamlit
+URL_API = "https://projeto-integracao-sst-2.onrender.com"
 SENHA_API = os.getenv("CHAVE_SECRETA", "senha_local_de_teste")
 HEADERS_AUTENTICACAO = {"x-token": SENHA_API}
 
-# 🚨 IMPORTANTE: Troque esta URL pelo link real que o Render te deu (sem o /docs no final)
-URL_API = "https://projeto-integracao-sst-2.onrender.com"
-HEADERS_AUTENTICACAO = {"x-token": "minha_chave_sst_2026"}
+# --- SEÇÃO 1: ALERTAS DO INSS ---
+st.header("🚨 Alertas Críticos (INSS)")
 
-st.set_page_config(page_title="Dashboard SST", layout="wide")
-st.title("📊 Painel de Controle - Saúde e Segurança do Trabalho")
-
-st.markdown("---")
-
-# 1. Consumindo o Endpoint de Alertas do INSS
-st.subheader("🚨 Alertas Críticos de INSS (15+ dias)")
-
-# O painel faz uma requisição GET para a sua API na nuvem
 resposta_inss = requests.get(f"{URL_API}/alertas/inss", headers=HEADERS_AUTENTICACAO)
 
-# Se a API responder com sucesso (Status 200 OK)
 if resposta_inss.status_code == 200:
     dados_inss = resposta_inss.json()
     if dados_inss:
-        # Transformamos o JSON em uma tabela do Pandas
+        # A VARIÁVEL df_inss NASCE AQUI!
         df_inss = pd.DataFrame(dados_inss)
         st.dataframe(df_inss, use_container_width=True)
-        # --- NOVO CÓDIGO DO GRÁFICO ---
-        st.markdown("---") # Cria uma linha separadora visual
-        st.subheader("📊 Análise Gráfica de Afastamentos")
         
-        # Montando o gráfico de barras com Plotly
-        fig = px.bar(
-            df_inss, # O seu dataframe com os dados do INSS
-            x="Nome", 
-            y="Total_Dias_Afastado", 
-            title="Dias Acumulados por Funcionário (Risco INSS)",
-            text_auto=True, # Mostra o número exato em cima de cada barra
-            color="Total_Dias_Afastado", # A cor muda conforme a gravidade
-            color_continuous_scale="Reds" # Escala de cores vermelha para alertas
+        st.markdown("---") 
+        st.subheader("📈 Análise Gráfica de Afastamentos")
+        
+        # O Slider na barra lateral
+        st.sidebar.header("🎛️ Filtros do Dashboard")
+        dias_minimos = st.sidebar.slider(
+            "Filtrar mínimo de dias (Alertas):", 
+            min_value=15, 
+            max_value=100, 
+            value=15, 
+            step=1
         )
-        
-        # Ajusta o design do gráfico para ficar limpo
-        fig.update_layout(xaxis_title="Funcionário", yaxis_title="Total de Dias")
-        
-        # Exibe o gráfico no Streamlit ocupando a largura total da tela
-        st.plotly_chart(fig, use_container_width=True)
+
+        # O filtro acontece aqui, DENTRO do bloco onde o df_inss existe
+        df_filtrado = df_inss[df_inss['Total_Dias_Afastado'] >= dias_minimos]
+
+        if df_filtrado.empty:
+            st.warning(f"Nenhum funcionário atingiu a marca de {dias_minimos} dias de afastamento.")
+        else:
+            fig = px.bar(
+                df_filtrado, 
+                x="Nome", 
+                y="Total_Dias_Afastado", 
+                title=f"Funcionários com {dias_minimos} ou mais dias acumulados",
+                text_auto=True, 
+                color="Total_Dias_Afastado", 
+                color_continuous_scale="Reds" 
+            )
+            fig.update_layout(xaxis_title="Funcionário", yaxis_title="Total de Dias")
+            st.plotly_chart(fig, use_container_width=True)
+            
     else:
         st.success("Nenhum funcionário com mais de 15 dias de afastamento.")
 else:
     st.error(f"Falha ao conectar com a API. Erro: {resposta_inss.status_code}")
-    
 
+# --- SEÇÃO 2: BUSCA DINÂMICA ---
 st.markdown("---")
+st.header("🔍 Busca de Histórico por Funcionário")
 
-# 2. Consumindo o Endpoint Dinâmico (Busca por Funcionário)
-st.subheader("🔍 Busca de Histórico por Funcionário")
-
-# Criamos uma caixa de texto para o usuário digitar o nome
-nome_busca = st.text_input("Digite o nome do funcionário (Ex: Mariana):")
-
-# Se o usuário digitar algo, fazemos a requisição para a rota dinâmica
-if nome_busca:
-    resposta_busca = requests.get(f"{URL_API}/atestados/{nome_busca}",headers=HEADERS_AUTENTICACAO)
-    
-    if resposta_busca.status_code == 200:
-        dados_busca = resposta_busca.json()
+nome_busca = st.text_input("Digite o nome do funcionário:")
+if st.button("Buscar"):
+    if nome_busca:
+        resposta_busca = requests.get(f"{URL_API}/atestados/{nome_busca}", headers=HEADERS_AUTENTICACAO)
         
-        # Verifica se a API retornou uma lista de atestados ou aquela mensagem de erro
-        if isinstance(dados_busca, list):
-            df_busca = pd.DataFrame(dados_busca)
-            st.dataframe(df_busca, use_container_width=True)
+        if resposta_busca.status_code == 200:
+            dados_busca = resposta_busca.json()
+            if isinstance(dados_busca, list):
+                df_busca = pd.DataFrame(dados_busca)
+                st.dataframe(df_busca, use_container_width=True)
+            else:
+                st.warning(dados_busca.get("mensagem", "Nenhum dado encontrado."))
         else:
-            st.warning(dados_busca.get("mensagem", "Nenhum dado encontrado."))
-    else:
-        st.error("Falha ao buscar os dados na API.")
+            st.error("Erro ao buscar dados.")
