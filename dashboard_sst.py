@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import pandas as pd
 import requests
+import plotly.express as px
 
 # ...
 
@@ -31,10 +32,31 @@ if resposta_inss.status_code == 200:
         # Transformamos o JSON em uma tabela do Pandas
         df_inss = pd.DataFrame(dados_inss)
         st.dataframe(df_inss, use_container_width=True)
+        # --- NOVO CÓDIGO DO GRÁFICO ---
+        st.markdown("---") # Cria uma linha separadora visual
+        st.subheader("📊 Análise Gráfica de Afastamentos")
+        
+        # Montando o gráfico de barras com Plotly
+        fig = px.bar(
+            df_inss, # O seu dataframe com os dados do INSS
+            x="Nome", 
+            y="Total_Dias_Afastado", 
+            title="Dias Acumulados por Funcionário (Risco INSS)",
+            text_auto=True, # Mostra o número exato em cima de cada barra
+            color="Total_Dias_Afastado", # A cor muda conforme a gravidade
+            color_continuous_scale="Reds" # Escala de cores vermelha para alertas
+        )
+        
+        # Ajusta o design do gráfico para ficar limpo
+        fig.update_layout(xaxis_title="Funcionário", yaxis_title="Total de Dias")
+        
+        # Exibe o gráfico no Streamlit ocupando a largura total da tela
+        st.plotly_chart(fig, use_container_width=True)
     else:
         st.success("Nenhum funcionário com mais de 15 dias de afastamento.")
 else:
     st.error(f"Falha ao conectar com a API. Erro: {resposta_inss.status_code}")
+    
 
 st.markdown("---")
 
