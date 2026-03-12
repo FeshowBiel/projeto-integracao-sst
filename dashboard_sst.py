@@ -9,7 +9,14 @@ st.set_page_config(page_title="Dashboard SST", layout="wide")
 st.title("📊 Painel de Integração SST")
 
 URL_API = "https://projeto-integracao-sst-2.onrender.com"
-SENHA_API = os.getenv("CHAVE_SECRETA", "senha_local_de_teste")
+
+# Usando a forma nativa do Streamlit para ler o cofre
+try:
+    SENHA_API = st.secrets["CHAVE_SECRETA"]
+except FileNotFoundError:
+    # Se estiver rodando no seu PC local (onde não tem cofre), usa a falsa
+    SENHA_API = "senha_local_de_teste"
+
 HEADERS_AUTENTICACAO = {"x-token": SENHA_API}
 
 # --- SEÇÃO 1: ALERTAS DO INSS ---
