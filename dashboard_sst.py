@@ -1,6 +1,13 @@
+import os
 import streamlit as st
 import pandas as pd
 import requests
+
+# ...
+
+# Puxa a senha do cofre do Streamlit
+SENHA_API = os.getenv("CHAVE_SECRETA", "senha_local_de_teste")
+HEADERS_AUTENTICACAO = {"x-token": SENHA_API}
 
 # 🚨 IMPORTANTE: Troque esta URL pelo link real que o Render te deu (sem o /docs no final)
 URL_API = "https://projeto-integracao-sst-2.onrender.com"

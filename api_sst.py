@@ -1,6 +1,12 @@
+import os
 from fastapi import FastAPI, HTTPException, Header, Depends
 import sqlite3
 
+# ...
+
+# O código vai tentar ler a senha do cofre do Render. 
+# Se não achar, usa essa falsa apenas para você conseguir testar no seu próprio PC.
+CHAVE_SECRETA = os.getenv("CHAVE_SECRETA", "senha_local_de_teste")
 # Instanciando a nossa aplicação API
 app = FastAPI(
     title="API - Integração SST", 
