@@ -3,7 +3,8 @@ import pandas as pd
 import requests
 
 # 🚨 IMPORTANTE: Troque esta URL pelo link real que o Render te deu (sem o /docs no final)
-URL_API = "https://projeto-integracao-sst-2.onrender.com/"
+URL_API = "https://projeto-integracao-sst-2.onrender.com"
+HEADERS_AUTENTICACAO = {"x-token": "minha_chave_sst_2026"}
 
 st.set_page_config(page_title="Dashboard SST", layout="wide")
 st.title("📊 Painel de Controle - Saúde e Segurança do Trabalho")
@@ -14,7 +15,7 @@ st.markdown("---")
 st.subheader("🚨 Alertas Críticos de INSS (15+ dias)")
 
 # O painel faz uma requisição GET para a sua API na nuvem
-resposta_inss = requests.get(f"{URL_API}/alertas/inss")
+resposta_inss = requests.get(f"{URL_API}/alertas/inss", headers=HEADERS_AUTENTICACAO)
 
 # Se a API responder com sucesso (Status 200 OK)
 if resposta_inss.status_code == 200:
@@ -38,7 +39,7 @@ nome_busca = st.text_input("Digite o nome do funcionário (Ex: Mariana):")
 
 # Se o usuário digitar algo, fazemos a requisição para a rota dinâmica
 if nome_busca:
-    resposta_busca = requests.get(f"{URL_API}/atestados/{nome_busca}")
+    resposta_busca = requests.get(f"{URL_API}/atestados/{nome_busca}",headers=HEADERS_AUTENTICACAO)
     
     if resposta_busca.status_code == 200:
         dados_busca = resposta_busca.json()

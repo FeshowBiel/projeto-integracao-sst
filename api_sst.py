@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Header, Depends
 import sqlite3
 
 # Instanciando a nossa aplicação API
@@ -6,6 +6,11 @@ app = FastAPI(
     title="API - Integração SST", 
     description="API para consulta de dados de Saúde Ocupacional e cruzamento de atestados"
 )
+CHAVE_SECRETA = "minha_chave_sst_2026"
+
+def validar_token(x_token: str = Header(None)):
+    if x_token != CHAVE_SECRETA:
+        raise HTTPException(status_code=401, detail="Acesso Negado: Chave de API inválida ou ausente.")
 
 # Função auxiliar para conectar no banco e retornar os dados
 def conectar_banco():
@@ -19,7 +24,7 @@ def home():
     return {"mensagem": "Sistemas online: Bem-vindo à API de Integração SST"}
 
 # 2. Endpoint de Negócio: Listando os casos críticos de INSS (15+ dias)
-@app.get("/alertas/inss")
+@app.get("/alertas/inss", dependencies=[Depends(validar_token)])
 def get_alertas_inss():
     conexao = conectar_banco()
     cursor = conexao.cursor()
@@ -42,7 +47,7 @@ def get_alertas_inss():
     return [dict(linha) for linha in resultados]
 
 # 3. Endpoint Dinâmico: Buscando o histórico de um funcionário específico
-@app.get("/atestados/{nome_funcionario}")
+@app.get("/atestados/{nome_funcionario}", dependencies=[Depends(validar_token)])
 def get_historico_funcionario(nome_funcionario: str):
     conexao = conectar_banco()
     cursor = conexao.cursor()
