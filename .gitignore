@@ -1,5 +1,5 @@
 # Ignorar arquivos de banco de dados (LGPD / Segurança)
-*.db
+
 *.sqlite3
 
 # Ignorar pastas temporárias do Python (lixo de sistema)

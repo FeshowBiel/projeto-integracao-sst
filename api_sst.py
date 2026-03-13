@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, Depends # ATUALIZACAO DA FECHADURA
 import os # <-- GARANTA QUE ESSA LINHA EXISTA
 
 app = FastAPI()
