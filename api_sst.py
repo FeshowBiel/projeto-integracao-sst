@@ -35,7 +35,7 @@ def get_alertas_inss(token: str = Depends(verificar_token)):
     return [dict(linha) for linha in resultados]
 
 # 3. Endpoint Dinâmico: Buscando o histórico de um funcionário específico
-@app.get("/atestados/{nome_funcionario}", dependencies=[Depends(validar_token)])
+@app.get("/atestados/{nome_funcionario}", dependencies=[Depends(verificar_token)])
 def get_historico_funcionario(nome_funcionario: str):
     conexao = conectar_banco()
     cursor = conexao.cursor()
