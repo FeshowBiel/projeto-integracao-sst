@@ -1,15 +1,15 @@
 from fastapi import FastAPI, HTTPException, Header, Depends
-import os
+import os # <-- GARANTA QUE ESSA LINHA EXISTA
 
 app = FastAPI()
 
 # 1. A API vai tentar ler a senha da nuvem. Se não achar, usa a de teste.
-CHAVE_SECRETA = os.getenv("CHAVE_SECRETA", "senha_local_de_teste")
+CHAVE_SECRETA = os.getenv("CHAVE_SECRETA", "SenhaSST2026")
 
 # 2. A função que atua como o "segurança na porta"
 async def verificar_token(x_token: str = Header(None)):
     if x_token != CHAVE_SECRETA:
-        raise HTTPException(status_code=401, detail="Acesso Negado: Token Invalido")
+        raise HTTPException(status_code=401, detail="Acesso Negado: A nova fechadura esta funcionando!")
     return x_token
 
 # 3. Exemplo de como a sua rota do INSS deve estar protegida:
