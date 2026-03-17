@@ -4,28 +4,31 @@ import pandas as pd
 import requests
 import plotly.express as px
 
-# --- CONFIGURAÇÃO DA PÁGININA E SEGURANÇA ---
+# --- CONFIGURAÇÃO DA PÁGINA E SEGURANÇA ---
 st.set_page_config(page_title="Dashboard SST", layout="wide")
 st.title("📊 Painel de Integração SST")
 
 URL_API = "https://projeto-integracao-sst-2.onrender.com"
 
-# Usando a forma nativa do Streamlit para ler o cofre
+# CORREÇÃO: Lê a "CHAVE_SECRETA". Se não achar (rodando local), usa a "SenhaSST2026"
+# Tenta abrir o cofre da nuvem. Se o cofre não existir (Erro) ou a chave não estiver lá, usa a senha oficial.
 try:
     SENHA_API = st.secrets["CHAVE_SECRETA"]
-except FileNotFoundError:
-    # Se estiver rodando no seu PC local (onde não tem cofre), usa a falsa
-    SENHA_API = "senha_local_de_teste"
+except Exception:
+    # Cai aqui automaticamente quando rodamos localmente no VS Code
+    SENHA_API = "SenhaSST2026"
 
 HEADERS_AUTENTICACAO = {"x-token": SENHA_API}
 
 # --- SEÇÃO 1: ALERTAS DO INSS ---
 st.header("🚨 Alertas Críticos (INSS)")
 
+# Fazendo a requisição para o backend
 resposta_inss = requests.get(f"{URL_API}/alertas/inss", headers=HEADERS_AUTENTICACAO)
 
 if resposta_inss.status_code == 200:
     dados_inss = resposta_inss.json()
+    
     if dados_inss:
         # A VARIÁVEL df_inss NASCE AQUI!
         df_inss = pd.DataFrame(dados_inss)
@@ -72,16 +75,19 @@ st.markdown("---")
 st.header("🔍 Busca de Histórico por Funcionário")
 
 nome_busca = st.text_input("Digite o nome do funcionário:")
+
 if st.button("Buscar"):
     if nome_busca:
         resposta_busca = requests.get(f"{URL_API}/atestados/{nome_busca}", headers=HEADERS_AUTENTICACAO)
         
         if resposta_busca.status_code == 200:
             dados_busca = resposta_busca.json()
+            
+            # Se for uma lista, achou dados. Se for dicionário, é a mensagem de "não encontrado"
             if isinstance(dados_busca, list):
                 df_busca = pd.DataFrame(dados_busca)
                 st.dataframe(df_busca, use_container_width=True)
             else:
                 st.warning(dados_busca.get("mensagem", "Nenhum dado encontrado."))
         else:
-            st.error("Erro ao buscar dados.")
+            st.error(f"Erro ao buscar dados. Código: {resposta_busca.status_code}")
