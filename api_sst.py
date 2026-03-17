@@ -1,4 +1,5 @@
 import os
+import sqlite3 # 1. Importando o motor do banco de dados
 from fastapi import FastAPI, HTTPException, Header, Depends
 
 app = FastAPI()
@@ -12,10 +13,22 @@ async def verificar_token(x_token: str = Header(None)):
         raise HTTPException(status_code=401, detail="Acesso Negado: A fechadura final funcionou!")
     return x_token
 
-# 3. Exemplo de como a sua rota do INSS deve estar protegida:
+# 3. FUNÇÃO NOVA: Padronizando a conexão com o banco
+def conectar_banco():
+    # COLOQUE O NOME DO SEU ARQUIVO DE BANCO DE DADOS AQUI:
+    conexao = sqlite3.connect('banco_sst.db')
+    
+    # Isso ensina o SQLite a devolver os dados em formato de dicionário
+    conexao.row_factory = sqlite3.Row 
+    return conexao
+
+# 4. Exemplo de como a sua rota do INSS deve estar protegida:
 @app.get("/alertas/inss")
 def get_alertas_inss(token: str = Depends(verificar_token)):
-    # ... (aqui continua o seu código normal que busca os dados)
+    
+    # AGORA SIM! Criamos a conexão e o cursor antes de usar:
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
     
     query = """
         SELECT 
@@ -34,13 +47,14 @@ def get_alertas_inss(token: str = Depends(verificar_token)):
     
     return [dict(linha) for linha in resultados]
 
-# 3. Endpoint Dinâmico: Buscando o histórico de um funcionário específico
+# 5. Endpoint Dinâmico: Buscando o histórico de um funcionário específico
 @app.get("/atestados/{nome_funcionario}", dependencies=[Depends(verificar_token)])
 def get_historico_funcionario(nome_funcionario: str):
+    
+    # Aqui já estava certo, mas agora a função conectar_banco existe!
     conexao = conectar_banco()
     cursor = conexao.cursor()
     
-    # Query 100% corrigida: usando data_atestado no SELECT e no ORDER BY
     query = """
         SELECT 
             f.Nome, 
